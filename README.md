@@ -177,3 +177,26 @@ piutang, komisi dokter (40%), dan laporan keuangan (laba-rugi, arus kas, per dok
 pembayaran & nomor INV-...) · `invoice_items` (item tagihan, dengan `komisi_persen`) ·
 `payments` · `receivables` · `commission_entries` · `doctor_payrolls` ·
 `ledger_entries` · `settings`
+## Deployment ke Render (backend)
+
+Repo: `najeishere/tentangdental-be`. Sudah ada `Dockerfile`, `render.yaml`, dan `start.sh`, jadi deploy Cuma klik.
+
+1. Buat akun di https://render.com (login via GitHub).
+2. Buat DB MySQL gratis **(TiDB Serverless**, MySQL-compatible, tanpa kartu kredit):
+   - https://tidbcloud.com → New Cluster (Serverless, free) → simpan *Connection string*.
+   - Nilai yang dipakai: `HOST` (mis. `gateway01.ap-southeast-1.prod.aws.tidbcloud.com`), `PORT` (`4000`), `DATABASE` (mis. `tentangdental`), `USERNAME`, `PASSWORD`.
+   - Unduh CA file `ca.pem` dari halaman TiDB (opsi download di dashboard).
+   - Alternatif: Aiven MySQL gratis (https://console.aiven.io) — port `3306`, wajib SSL (pakai `ca.pem` juga).
+3. Di Render: **New → Blueprint** → pilih repo `tentangdental-be` → ikuti `render.yaml`.
+4. Isi **Environment** (berisi dari render.yaml, lengkapi yang sync:false):
+   - `APP_URL` = `https://<nama-service>.onrender.com`
+   - `APP_KEY` = hasil `php artisan key:generate --show` (atau dari kolom berikut)
+   - `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD` = dari DB gratis
+   - `MYSQL_ATTR_SSL_CA` = path CA di image; cara praktis: taruh `ca.pem` di root repo lalu isi `/var/www/html/ca.pem`
+5. **Manual Deploy** → tunggu build (2–5 menit). Catatan: di paket free, service tidur setelah ~15 menit tidak dipakai; panggilan pertama butuh ~1 menit.
+6. Cek: `curl https://<nama-service>.onrender.com/api/clinic/pubinfo` → harus `200`.
+
+### Koneksi frontend Vercel ke backend Render
+Di dashboard Vercel (proyek `tentangdental-fe` → Settings → Environment Variables):
+- `VITE_API_URL` = `https://<nama-service>.onrender.com/api`
+- Redeploy (atau `vercel --prod`).
