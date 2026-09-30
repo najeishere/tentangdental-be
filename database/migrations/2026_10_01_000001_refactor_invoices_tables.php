@@ -45,6 +45,8 @@ return new class extends Migration
         });
 
         // ===================== SALIN DATA EXISTING =====================
+        $now = now()->toDateTimeString();
+
         DB::table('invoices')->insertUsing(
             [
                 'visit_id', 'invoice_number', 'subtotal', 'discount', 'total',
@@ -58,8 +60,8 @@ return new class extends Migration
                 'total',
                 'payment_status',
                 'visit_date as issued_at',
-                DB::raw('NOW() as created_at'),
-                DB::raw('NOW() as updated_at')
+                DB::raw("'{$now}' as created_at"),
+                DB::raw("'{$now}' as updated_at")
             )
         );
 
@@ -79,8 +81,8 @@ return new class extends Migration
                     'vi.komisi_persen',
                     'vi.discount',
                     'vi.total',
-                    DB::raw('NOW() as created_at'),
-                    DB::raw('NOW() as updated_at')
+                    DB::raw("'{$now}' as created_at"),
+                    DB::raw("'{$now}' as updated_at")
                 )
         );
 
@@ -98,12 +100,18 @@ return new class extends Migration
         Schema::dropIfExists('visits_items');
 
         Schema::table('visits', function (Blueprint $table) {
+            $table->dropUnique(['invoice_number']);
+        });
+
+        Schema::table('visits', function (Blueprint $table) {
             $table->dropColumn(['invoice_number', 'payment_status', 'subtotal', 'discount', 'total']);
         });
     }
 
     public function down(): void
     {
+        $now = now()->toDateTimeString();
+
         // Kembalikan kolom invoicing ke `visits`
         Schema::table('visits', function (Blueprint $table) {
             $table->string('invoice_number')->nullable();
@@ -159,8 +167,8 @@ return new class extends Migration
                     'ii.komisi_persen',
                     'ii.discount',
                     'ii.total',
-                    DB::raw('NOW() as created_at'),
-                    DB::raw('NOW() as updated_at')
+                    DB::raw("'{$now}' as created_at"),
+                    DB::raw("'{$now}' as updated_at")
                 )
         );
 

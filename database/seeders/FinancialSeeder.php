@@ -171,6 +171,7 @@ class FinancialSeeder extends Seeder
             InvoiceItem::query()->create([
                 'invoice_id' => $invoice->id,
                 'tindakan_id' => $item['tindakan_id'],
+                'quantity' => 1,
                 'tarif_name' => $item['name'],
                 'price' => $item['price'],
                 'komisi_persen' => $item['komisi_persen'],

@@ -44,6 +44,7 @@ class KasirController extends Controller
 
             $items[] = [
                 'tindakan_id' => $tindakan->id,
+                'quantity' => $qty,
                 'tarif_name' => $tindakan->name,
                 'price' => $price,
                 'komisi_persen' => (float) $tindakan->komisi_persen,
@@ -318,7 +319,7 @@ class KasirController extends Controller
                 'verified_at' => now(),
             ]);
 
-            $totalConfirmed = (float) $payment->visit->payments
+            $totalConfirmed = (float) $payment->visit->payments()
                 ->where('status', Payment::STATUS_CONFIRMED)
                 ->sum('amount');
             $isFull = $totalConfirmed >= (float) $payment->visit->total;
@@ -361,7 +362,7 @@ class KasirController extends Controller
 
     private function syncReceivableAndVisit(Visit $visit, bool $isFull): void
     {
-        $confirmed = (float) $visit->payments
+        $confirmed = (float) $visit->payments()
             ->where('status', Payment::STATUS_CONFIRMED)
             ->sum('amount');
 
